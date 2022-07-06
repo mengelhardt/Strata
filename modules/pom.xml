@@ -281,57 +281,57 @@
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-collect</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-basics</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-product</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-data</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-math</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-market</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-loader</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-pricer</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5-mengelhardt</version>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-calc</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-measure</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-report</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
       </dependency>
       <!-- Third party -->
       <dependency>
@@ -403,70 +403,70 @@
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-collect</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-basics</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-product</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-data</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-math</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-market</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-loader</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-pricer</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5-mengelhardt</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-calc</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.opengamma.strata</groupId>
         <artifactId>strata-measure</artifactId>
-        <version>${project.version}</version>
+        <version>2.12.5</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
