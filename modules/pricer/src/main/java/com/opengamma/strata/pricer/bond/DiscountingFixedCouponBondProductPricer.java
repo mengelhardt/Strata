@@ -696,6 +696,17 @@ public class DiscountingFixedCouponBondProductPricer {
       return (bond.getFixedRate() + (1d - cleanPrice) / maturity) / cleanPrice;
     }
 
+    ImmutableList<FixedCouponBondPaymentPeriod> payments = bond.getPeriodicPayments();
+    int nCoupon = payments.size() - couponIndex(payments, settlementDate);
+    if (nCoupon == 1) {
+      FixedCouponBondYieldConvention yieldConv = bond.getYieldConvention();
+      if (yieldConv.equals(US_STREET) || yieldConv.equals(DE_BONDS)) {
+        FixedCouponBondPaymentPeriod payment = payments.get(payments.size() - 1);
+        return ((1d + payment.getFixedRate() * payment.getYearFraction()) / dirtyPrice - 1d)
+            * ((double) bond.getFrequency().eventsPerYear()) / factorToNextCoupon(bond, settlementDate);
+      }
+    }
+
     final Function<Double, Double> priceResidual = new Function<Double, Double>() {
       @Override
       public Double apply(final Double y) {
