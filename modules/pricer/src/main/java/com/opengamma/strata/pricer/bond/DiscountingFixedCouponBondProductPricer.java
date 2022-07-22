@@ -614,7 +614,7 @@ public class DiscountingFixedCouponBondProductPricer {
       LocalDate settlementDate,
       double yield) {
 
-    int nbCoupon = bond.getPeriodicPayments().size();
+    int nbCoupon = bond.getPeriodicPayments().size() - 1;
     double factorOnPeriod = 1 + yield / ((double) bond.getFrequency().eventsPerYear());
     double fixedRate = bond.getFixedRate();
     double pvAtFirstCoupon = 0;
@@ -627,7 +627,9 @@ public class DiscountingFixedCouponBondProductPricer {
         ++pow;
       }
     }
-    pvAtFirstCoupon += 1d / Math.pow(factorOnPeriod, pow - 1);
+    FixedCouponBondPaymentPeriod lastPeriod = bond.getPeriodicPayments().get(nbCoupon);
+    double lastPow = pow - 1 + lastPeriod.getYearFraction() * bond.getFrequency().eventsPerYear();
+    pvAtFirstCoupon += (1d + fixedRate * lastPeriod.getYearFraction()) / Math.pow(factorOnPeriod, lastPow);
     return pvAtFirstCoupon * Math.pow(factorOnPeriod, -factorToNextCoupon(bond, settlementDate));
   }
 
