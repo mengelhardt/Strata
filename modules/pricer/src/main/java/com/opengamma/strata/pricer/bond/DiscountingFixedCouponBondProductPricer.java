@@ -659,24 +659,20 @@ public class DiscountingFixedCouponBondProductPricer {
     double priceAfter = Math.pow(factorOnPeriod, -factorNextCoupon);
     double price = pvAtFirstCoupon * priceAfter;
     // Backward sweep
-    double priceBar = 1.0d;
-    double priceAfterBar = pvAtFirstCoupon * priceBar;
-    double pvAtFirstCouponBar = priceAfter * priceBar;
-    double factorOnPeriodBar = -lastPow * Math.pow(factorOnPeriod, -lastPow - 1) * pvAtFirstCouponBar;
+    double factorOnPeriodBar = -lastPow * Math.pow(factorOnPeriod, -lastPow - 1) * priceAfter;
     int pow2 = 0;
     for (int loopcpn = 0; loopcpn < nbCoupon; loopcpn++) {
       FixedCouponBondPaymentPeriod period = bond.getPeriodicPayments().get(loopcpn);
       if ((period.hasExCouponPeriod() && !settlementDate.isAfter(period.getDetachmentDate())) ||
           (!period.hasExCouponPeriod() && period.getPaymentDate().isAfter(settlementDate))) {
-        pvAtFirstCoupon += fixedRate * period.getYearFraction() * Math.pow(factorOnPeriod, -pow2);
         factorOnPeriodBar +=
-            fixedRate * period.getYearFraction() * -pow2 * Math.pow(factorOnPeriod, -pow2 - 1) * pvAtFirstCouponBar;
+            fixedRate * period.getYearFraction() * -pow2 * Math.pow(factorOnPeriod, -pow2 - 1) * priceAfter;
         ++pow2;
       }
     }
     factorOnPeriodBar +=
-        fixedRate * lastPeriod.getYearFraction() * -lastPow * Math.pow(factorOnPeriod, -lastPow - 1) * pvAtFirstCouponBar;
-    factorOnPeriodBar += -factorNextCoupon * Math.pow(factorOnPeriod, -factorNextCoupon - 1.0) * priceAfterBar;
+        fixedRate * lastPeriod.getYearFraction() * -lastPow * Math.pow(factorOnPeriod, -lastPow - 1) * priceAfter;
+    factorOnPeriodBar += -factorNextCoupon * Math.pow(factorOnPeriod, -factorNextCoupon - 1.0) * pvAtFirstCoupon;
     double yieldBar = 1.0d / ((double) bond.getFrequency().eventsPerYear()) * factorOnPeriodBar;
     return ValueDerivatives.of(price, DoubleArray.of(yieldBar));
   }
