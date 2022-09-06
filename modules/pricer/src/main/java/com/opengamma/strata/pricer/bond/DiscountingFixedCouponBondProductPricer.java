@@ -639,7 +639,7 @@ public class DiscountingFixedCouponBondProductPricer {
       LocalDate settlementDate,
       double yield) {
 
-    int nbCoupon = bond.getPeriodicPayments().size();
+    int nbCoupon = bond.getPeriodicPayments().size() - 1;
     double factorOnPeriod = 1 + yield / ((double) bond.getFrequency().eventsPerYear());
     double fixedRate = bond.getFixedRate();
     double pvAtFirstCoupon = 0;
@@ -652,7 +652,9 @@ public class DiscountingFixedCouponBondProductPricer {
         ++pow;
       }
     }
-    pvAtFirstCoupon += Math.pow(factorOnPeriod, 1.0d - pow);
+    FixedCouponBondPaymentPeriod lastPeriod = bond.getPeriodicPayments().get(nbCoupon);
+    double lastPow = pow - 1 + lastPeriod.getYearFraction() * bond.getFrequency().eventsPerYear();
+    pvAtFirstCoupon += (1d + fixedRate * lastPeriod.getYearFraction()) * Math.pow(factorOnPeriod, -lastPow);
     double factorNextCoupon = factorToNextCoupon(bond, settlementDate);
     double priceAfter = Math.pow(factorOnPeriod, -factorNextCoupon);
     double price = pvAtFirstCoupon * priceAfter;
@@ -660,7 +662,7 @@ public class DiscountingFixedCouponBondProductPricer {
     double priceBar = 1.0d;
     double priceAfterBar = pvAtFirstCoupon * priceBar;
     double pvAtFirstCouponBar = priceAfter * priceBar;
-    double factorOnPeriodBar = (1.0d - pow) * Math.pow(factorOnPeriod, -pow) * pvAtFirstCouponBar;
+    double factorOnPeriodBar = -lastPow * Math.pow(factorOnPeriod, -lastPow - 1) * pvAtFirstCouponBar;
     int pow2 = 0;
     for (int loopcpn = 0; loopcpn < nbCoupon; loopcpn++) {
       FixedCouponBondPaymentPeriod period = bond.getPeriodicPayments().get(loopcpn);
@@ -672,6 +674,8 @@ public class DiscountingFixedCouponBondProductPricer {
         ++pow2;
       }
     }
+    factorOnPeriodBar +=
+        fixedRate * lastPeriod.getYearFraction() * -lastPow * Math.pow(factorOnPeriod, -lastPow - 1) * pvAtFirstCouponBar;
     factorOnPeriodBar += -factorNextCoupon * Math.pow(factorOnPeriod, -factorNextCoupon - 1.0) * priceAfterBar;
     double yieldBar = 1.0d / ((double) bond.getFrequency().eventsPerYear()) * factorOnPeriodBar;
     return ValueDerivatives.of(price, DoubleArray.of(yieldBar));
