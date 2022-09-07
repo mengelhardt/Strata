@@ -7,7 +7,9 @@ package com.opengamma.strata.math.impl.rootfinding;
 
 import java.util.function.Function;
 
+import com.opengamma.strata.basics.value.ValueDerivatives;
 import com.opengamma.strata.collect.ArgChecker;
+import com.opengamma.strata.collect.array.DoubleArray;
 import com.opengamma.strata.math.MathException;
 import com.opengamma.strata.math.impl.function.DoubleFunction1D;
 
@@ -198,11 +200,26 @@ public class NewtonRaphsonSingleRootFinder extends RealSingleRootFinder {
   public Double getRoot(DoubleFunction1D function, DoubleFunction1D derivative, Double x) {
     ArgChecker.notNull(function, "function");
     ArgChecker.notNull(derivative, "derivative function");
+    return getRootCombined(
+        x2 -> ValueDerivatives.of(function.applyAsDouble(x2), DoubleArray.of(derivative.applyAsDouble(x2))), x);
+  }
+
+  /**
+   * Uses a function that represents a function and its derivative. This method
+   * uses an initial guess for the root, rather than bounds.
+   * @param function The function that returns the value and the derivative, not null
+   * @param x The initial guess for the root, not null
+   * @return The root
+   * @throws MathException If the root is not found in 1000 attempts.
+   */
+  public Double getRootCombined(Function<Double, ValueDerivatives> function, Double x) {
+    ArgChecker.notNull(function, "function");
     ArgChecker.notNull(x, "x");
     double root = x;
     for (int i = 0; i < MAX_ITER; i++) {
-      double y = function.applyAsDouble(root);
-      double dy = derivative.applyAsDouble(root);
+      ValueDerivatives valueDerivative = function.apply(root);
+      double y = valueDerivative.getValue();
+      double dy = valueDerivative.getDerivative(0);
       double dx = y / dy;
       if (Math.abs(dx) <= _accuracy) {
         return root - dx;

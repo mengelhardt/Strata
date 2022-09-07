@@ -24,6 +24,7 @@ import com.opengamma.strata.collect.array.DoubleArray;
 import com.opengamma.strata.market.sensitivity.PointSensitivityBuilder;
 import com.opengamma.strata.math.impl.rootfinding.BracketRoot;
 import com.opengamma.strata.math.impl.rootfinding.BrentSingleRootFinder;
+import com.opengamma.strata.math.impl.rootfinding.NewtonRaphsonSingleRootFinder;
 import com.opengamma.strata.math.impl.rootfinding.RealSingleRootFinder;
 import com.opengamma.strata.pricer.CompoundedRateType;
 import com.opengamma.strata.pricer.DiscountingPaymentPricer;
@@ -52,10 +53,6 @@ public class DiscountingFixedCouponBondProductPricer {
       DiscountingPaymentPricer.DEFAULT);
 
   /**
-   * The root finder.
-   */
-  private static final RealSingleRootFinder ROOT_FINDER = new BrentSingleRootFinder();
-  /**
    * Brackets a root.
    */
   private static final BracketRoot ROOT_BRACKETER = new BracketRoot();
@@ -70,6 +67,11 @@ public class DiscountingFixedCouponBondProductPricer {
   private final DiscountingFixedCouponBondPaymentPeriodPricer periodPricer;
 
   /**
+   * The root finder.
+   */
+  private final RealSingleRootFinder rootFinder;
+
+  /**
    * Creates an instance.
    * 
    * @param periodPricer  the pricer for {@link FixedCouponBondPaymentPeriod}
@@ -79,8 +81,25 @@ public class DiscountingFixedCouponBondProductPricer {
       DiscountingFixedCouponBondPaymentPeriodPricer periodPricer,
       DiscountingPaymentPricer nominalPricer) {
 
+    this(periodPricer, nominalPricer, new BrentSingleRootFinder());
+  }
+
+  /**
+   * Creates an instance. If the {@link NewtonRaphsonSingleRootFinder} is used,
+   * then the coupon rate will be used as the starting point when finding yield.
+   * 
+   * @param periodPricer  the pricer for {@link FixedCouponBondPaymentPeriod}
+   * @param nominalPricer  the pricer for {@link Payment}
+   * @param rootFinder  the root finder
+   */
+  public DiscountingFixedCouponBondProductPricer(
+      DiscountingFixedCouponBondPaymentPeriodPricer periodPricer,
+      DiscountingPaymentPricer nominalPricer,
+      RealSingleRootFinder rootFinder) {
+
     this.nominalPricer = ArgChecker.notNull(nominalPricer, "nominalPricer");
     this.periodPricer = ArgChecker.notNull(periodPricer, "periodPricer");
+    this.rootFinder = ArgChecker.notNull(rootFinder, "rootFinder");
   }
 
   //-------------------------------------------------------------------------
@@ -322,7 +341,7 @@ public class DiscountingFixedCouponBondProductPricer {
       }
     };
     double[] range = ROOT_BRACKETER.getBracketedPoints(residual, -0.01, 0.01); // Starting range is [-1%, 1%]
-    return ROOT_FINDER.getRoot(residual, range[0], range[1]);
+    return rootFinder.getRoot(residual, range[0], range[1]);
   }
 
   //-------------------------------------------------------------------------
@@ -709,6 +728,23 @@ public class DiscountingFixedCouponBondProductPricer {
       }
     }
 
+    double yield = findYield(bond, settlementDate, dirtyPrice);
+    return yield;
+  }
+
+  private double findYield(ResolvedFixedCouponBond bond, LocalDate settlementDate, double dirtyPrice) {
+    if (rootFinder instanceof NewtonRaphsonSingleRootFinder) {
+      NewtonRaphsonSingleRootFinder nrRootFinder = (NewtonRaphsonSingleRootFinder) rootFinder;
+      final Function<Double, ValueDerivatives> priceResidualDerivative = new Function<Double, ValueDerivatives>() {
+        @Override
+        public ValueDerivatives apply(final Double y) {
+          ValueDerivatives valueDerivative = dirtyPriceFromYieldAd(bond, settlementDate, y);
+          return ValueDerivatives.of(valueDerivative.getValue() - dirtyPrice, valueDerivative.getDerivatives());
+        }
+      };
+      double yield = nrRootFinder.getRootCombined(priceResidualDerivative, bond.getFixedRate());
+      return yield; 
+    }
     final Function<Double, Double> priceResidual = new Function<Double, Double>() {
       @Override
       public Double apply(final Double y) {
@@ -716,7 +752,7 @@ public class DiscountingFixedCouponBondProductPricer {
       }
     };
     double[] range = ROOT_BRACKETER.getBracketedPoints(priceResidual, 0.00, 0.20);
-    double yield = ROOT_FINDER.getRoot(priceResidual, range[0], range[1]);
+    double yield = rootFinder.getRoot(priceResidual, range[0], range[1]);
     return yield;
   }
 
@@ -743,14 +779,7 @@ public class DiscountingFixedCouponBondProductPricer {
           (-1.0d / maturity * cleanPrice - (bond.getFixedRate() + (1d - cleanPrice) / maturity)) / (cleanPrice * cleanPrice);
       return ValueDerivatives.of(yield, DoubleArray.of(priceBar));
     }
-    final Function<Double, Double> priceResidual = new Function<Double, Double>() {
-      @Override
-      public Double apply(final Double y) {
-        return dirtyPriceFromYield(bond, settlementDate, y) - dirtyPrice;
-      }
-    };
-    double[] range = ROOT_BRACKETER.getBracketedPoints(priceResidual, 0.00, 0.20);
-    double yield = ROOT_FINDER.getRoot(priceResidual, range[0], range[1]);
+    double yield = findYield(bond, settlementDate, dirtyPrice);
     ValueDerivatives priceDYield = dirtyPriceFromYieldAd(bond, settlementDate, yield);
     return ValueDerivatives.of(yield, DoubleArray.of(1.0 / priceDYield.getDerivative(0)));
   }
