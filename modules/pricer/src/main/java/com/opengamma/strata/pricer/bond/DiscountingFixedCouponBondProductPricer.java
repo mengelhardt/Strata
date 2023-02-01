@@ -723,8 +723,11 @@ public class DiscountingFixedCouponBondProductPricer {
       FixedCouponBondYieldConvention yieldConv = bond.getYieldConvention();
       if (yieldConv.equals(US_STREET) || yieldConv.equals(DE_BONDS)) {
         FixedCouponBondPaymentPeriod payment = payments.get(payments.size() - 1);
-        return ((1d + payment.getFixedRate() * payment.getYearFraction()) / dirtyPrice - 1d)
-            * ((double) bond.getFrequency().eventsPerYear()) / factorToNextCoupon(bond, settlementDate);
+        double absYield = (1d + payment.getFixedRate() * payment.getYearFraction()) / dirtyPrice - 1d;
+        if (absYield == 0) {
+          return 0;
+        }
+        return absYield * ((double) bond.getFrequency().eventsPerYear()) / factorToNextCoupon(bond, settlementDate);
       }
     }
 
