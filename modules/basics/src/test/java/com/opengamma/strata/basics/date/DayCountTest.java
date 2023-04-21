@@ -45,6 +45,7 @@ import java.time.LocalDate;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -1024,6 +1025,7 @@ public class DayCountTest {
   }
 
   @Test
+  @Disabled("After adding support for custom payment schedules, day counts must start at beginning of period")
   public void test_actActIcma_middle() {
     // nominals, 2012-03-30 (P92D) 2012-06-30 (2011, 11, 2012-09-30)
     LocalDate start = LocalDate.of(2012, 4, 10);

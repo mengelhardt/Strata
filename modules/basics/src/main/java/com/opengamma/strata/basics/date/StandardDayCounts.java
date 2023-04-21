@@ -80,7 +80,7 @@ enum StandardDayCounts implements DayCount {
       // handle initial period, and cases where need to determine the previous coupon date
       // whether that is real or nominal
       if (firstDate.equals(scheduleStartDate)) {
-          return initPeriod(firstDate, secondDate, nextCouponDate, freq, eom);
+        return initPeriod(firstDate, secondDate, nextCouponDate, freq, eom);
       }
       // handle middle periods
       return calc(firstDate, nextCouponDate, firstDate, secondDate, freq);
