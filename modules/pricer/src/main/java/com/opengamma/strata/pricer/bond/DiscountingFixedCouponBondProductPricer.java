@@ -1083,8 +1083,14 @@ public class DiscountingFixedCouponBondProductPricer {
   }
 
   //-------------------------------------------------------------------------
-  // Accrual factor to the next coupon
-  private double factorToNextCoupon(ResolvedFixedCouponBond bond, LocalDate settlementDate) {
+  /**
+   * Calculates the accrual factor to the next coupon.
+   *
+   * @param bond  the product
+   * @param settlementDate  the settlement date
+   * @return the accrual factor to the next coupon
+   */
+  public double factorToNextCoupon(ResolvedFixedCouponBond bond, LocalDate settlementDate) {
     if (bond.getPeriodicPayments().get(0).getStartDate().isAfter(settlementDate)) {
       return 0d;
     }
