@@ -16,6 +16,7 @@ import java.util.function.Function;
 
 import com.google.common.collect.ImmutableList;
 import com.opengamma.strata.basics.ReferenceData;
+import com.opengamma.strata.basics.currency.Currency;
 import com.opengamma.strata.basics.currency.CurrencyAmount;
 import com.opengamma.strata.basics.currency.Payment;
 import com.opengamma.strata.basics.value.ValueDerivatives;
@@ -727,7 +728,10 @@ public class DiscountingFixedCouponBondProductPricer {
         if (absYield == 0) {
           return 0;
         }
-        return absYield * ((double) bond.getFrequency().eventsPerYear()) / factorToNextCoupon(bond, settlementDate);
+        double annualMultiplier = Currency.AUD.equals(bond.getCurrency())
+                ? 365.0 / (bond.getUnadjustedEndDate().toEpochDay() - settlementDate.toEpochDay())
+                : ((double) bond.getFrequency().eventsPerYear()) / factorToNextCoupon(bond, settlementDate);
+        return absYield * annualMultiplier;
       }
     }
 
