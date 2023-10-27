@@ -82,6 +82,13 @@ public final class ResolvedFixedCouponBond
   @PropertyDefinition(validate = "notNull")
   private final Payment nominalPayment;
   /**
+   * The redemption value of the product.
+   * <p>
+   * If the redemption value is null, the nominalPayment amount is used for the redemption value.
+   */
+  @PropertyDefinition
+  private final Double redemptionValue;
+  /**
    * The periodic payments of the product.
    * <p>
    * Each payment period represents part of the life-time of the product.
@@ -218,6 +225,17 @@ public final class ResolvedFixedCouponBond
   }
 
   /**
+   * Gets the ratio of the redemption value to the notional amount, must be positive.
+   * <p>
+   * The redemption ratio expressed here must be positive.
+   *
+   * @return the redemption ratio
+   */
+  public double getRedemptionRatio() {
+    return redemptionValue != null ? redemptionValue / nominalPayment.getAmount() : 1;
+  }
+
+  /**
    * Checks if there is an ex-coupon period.
    * 
    * @return true if has an ex-coupon period
@@ -333,6 +351,7 @@ public final class ResolvedFixedCouponBond
   ResolvedFixedCouponBond(
       SecurityId securityId,
       Payment nominalPayment,
+      Double redemptionValue,
       List<FixedCouponBondPaymentPeriod> periodicPayments,
       Frequency frequency,
       RollConvention rollConvention,
@@ -352,6 +371,7 @@ public final class ResolvedFixedCouponBond
     JodaBeanUtils.notNull(settlementDateOffset, "settlementDateOffset");
     this.securityId = securityId;
     this.nominalPayment = nominalPayment;
+    this.redemptionValue = redemptionValue;
     this.periodicPayments = ImmutableList.copyOf(periodicPayments);
     this.frequency = frequency;
     this.rollConvention = rollConvention;
@@ -387,6 +407,17 @@ public final class ResolvedFixedCouponBond
    */
   public Payment getNominalPayment() {
     return nominalPayment;
+  }
+
+  //-----------------------------------------------------------------------
+  /**
+   * Gets the redemption value of the product.
+   * <p>
+   * If the redemption value is null, the nominalPayment amount is used for the redemption value.
+   * @return the value of the property
+   */
+  public Double getRedemptionValue() {
+    return redemptionValue;
   }
 
   //-----------------------------------------------------------------------
@@ -504,6 +535,7 @@ public final class ResolvedFixedCouponBond
       ResolvedFixedCouponBond other = (ResolvedFixedCouponBond) obj;
       return JodaBeanUtils.equal(securityId, other.securityId) &&
           JodaBeanUtils.equal(nominalPayment, other.nominalPayment) &&
+          JodaBeanUtils.equal(redemptionValue, other.redemptionValue) &&
           JodaBeanUtils.equal(periodicPayments, other.periodicPayments) &&
           JodaBeanUtils.equal(frequency, other.frequency) &&
           JodaBeanUtils.equal(rollConvention, other.rollConvention) &&
@@ -521,6 +553,7 @@ public final class ResolvedFixedCouponBond
     int hash = getClass().hashCode();
     hash = hash * 31 + JodaBeanUtils.hashCode(securityId);
     hash = hash * 31 + JodaBeanUtils.hashCode(nominalPayment);
+    hash = hash * 31 + JodaBeanUtils.hashCode(redemptionValue);
     hash = hash * 31 + JodaBeanUtils.hashCode(periodicPayments);
     hash = hash * 31 + JodaBeanUtils.hashCode(frequency);
     hash = hash * 31 + JodaBeanUtils.hashCode(rollConvention);
@@ -538,6 +571,7 @@ public final class ResolvedFixedCouponBond
     buf.append("ResolvedFixedCouponBond{");
     buf.append("securityId").append('=').append(JodaBeanUtils.toString(securityId)).append(',').append(' ');
     buf.append("nominalPayment").append('=').append(JodaBeanUtils.toString(nominalPayment)).append(',').append(' ');
+    buf.append("redemptionValue").append('=').append(JodaBeanUtils.toString(redemptionValue)).append(',').append(' ');
     buf.append("periodicPayments").append('=').append(JodaBeanUtils.toString(periodicPayments)).append(',').append(' ');
     buf.append("frequency").append('=').append(JodaBeanUtils.toString(frequency)).append(',').append(' ');
     buf.append("rollConvention").append('=').append(JodaBeanUtils.toString(rollConvention)).append(',').append(' ');
@@ -570,6 +604,11 @@ public final class ResolvedFixedCouponBond
      */
     private final MetaProperty<Payment> nominalPayment = DirectMetaProperty.ofImmutable(
         this, "nominalPayment", ResolvedFixedCouponBond.class, Payment.class);
+    /**
+     * The meta-property for the {@code redemptionValue} property.
+     */
+    private final MetaProperty<Double> redemptionValue = DirectMetaProperty.ofImmutable(
+        this, "redemptionValue", ResolvedFixedCouponBond.class, Double.class);
     /**
      * The meta-property for the {@code periodicPayments} property.
      */
@@ -618,6 +657,7 @@ public final class ResolvedFixedCouponBond
         this, null,
         "securityId",
         "nominalPayment",
+        "redemptionValue",
         "periodicPayments",
         "frequency",
         "rollConvention",
@@ -640,6 +680,8 @@ public final class ResolvedFixedCouponBond
           return securityId;
         case -44199542:  // nominalPayment
           return nominalPayment;
+        case 348936710:  // redemptionValue
+          return redemptionValue;
         case -367345944:  // periodicPayments
           return periodicPayments;
         case -70023844:  // frequency
@@ -690,6 +732,14 @@ public final class ResolvedFixedCouponBond
      */
     public MetaProperty<Payment> nominalPayment() {
       return nominalPayment;
+    }
+
+    /**
+     * The meta-property for the {@code redemptionValue} property.
+     * @return the meta-property, not null
+     */
+    public MetaProperty<Double> redemptionValue() {
+      return redemptionValue;
     }
 
     /**
@@ -764,6 +814,8 @@ public final class ResolvedFixedCouponBond
           return ((ResolvedFixedCouponBond) bean).getSecurityId();
         case -44199542:  // nominalPayment
           return ((ResolvedFixedCouponBond) bean).getNominalPayment();
+        case 348936710:  // redemptionValue
+          return ((ResolvedFixedCouponBond) bean).getRedemptionValue();
         case -367345944:  // periodicPayments
           return ((ResolvedFixedCouponBond) bean).getPeriodicPayments();
         case -70023844:  // frequency
@@ -803,6 +855,7 @@ public final class ResolvedFixedCouponBond
 
     private SecurityId securityId;
     private Payment nominalPayment;
+    private Double redemptionValue;
     private List<FixedCouponBondPaymentPeriod> periodicPayments = ImmutableList.of();
     private Frequency frequency;
     private RollConvention rollConvention;
@@ -825,6 +878,7 @@ public final class ResolvedFixedCouponBond
     private Builder(ResolvedFixedCouponBond beanToCopy) {
       this.securityId = beanToCopy.getSecurityId();
       this.nominalPayment = beanToCopy.getNominalPayment();
+      this.redemptionValue = beanToCopy.getRedemptionValue();
       this.periodicPayments = beanToCopy.getPeriodicPayments();
       this.frequency = beanToCopy.getFrequency();
       this.rollConvention = beanToCopy.getRollConvention();
@@ -843,6 +897,8 @@ public final class ResolvedFixedCouponBond
           return securityId;
         case -44199542:  // nominalPayment
           return nominalPayment;
+        case 348936710:  // redemptionValue
+          return redemptionValue;
         case -367345944:  // periodicPayments
           return periodicPayments;
         case -70023844:  // frequency
@@ -873,6 +929,9 @@ public final class ResolvedFixedCouponBond
           break;
         case -44199542:  // nominalPayment
           this.nominalPayment = (Payment) newValue;
+          break;
+        case 348936710:  // redemptionValue
+          this.redemptionValue = (Double) newValue;
           break;
         case -367345944:  // periodicPayments
           this.periodicPayments = (List<FixedCouponBondPaymentPeriod>) newValue;
@@ -915,6 +974,7 @@ public final class ResolvedFixedCouponBond
       return new ResolvedFixedCouponBond(
           securityId,
           nominalPayment,
+          redemptionValue,
           periodicPayments,
           frequency,
           rollConvention,
@@ -949,6 +1009,18 @@ public final class ResolvedFixedCouponBond
     public Builder nominalPayment(Payment nominalPayment) {
       JodaBeanUtils.notNull(nominalPayment, "nominalPayment");
       this.nominalPayment = nominalPayment;
+      return this;
+    }
+
+    /**
+     * Sets the redemption value of the product.
+     * <p>
+     * If the redemption value is null, the nominalPayment amount is used for the redemption value.
+     * @param redemptionValue  the new value
+     * @return this, for chaining, not null
+     */
+    public Builder redemptionValue(double redemptionValue) {
+      this.redemptionValue = redemptionValue;
       return this;
     }
 
@@ -1081,6 +1153,7 @@ public final class ResolvedFixedCouponBond
       buf.append("ResolvedFixedCouponBond.Builder{");
       buf.append("securityId").append('=').append(JodaBeanUtils.toString(securityId)).append(',').append(' ');
       buf.append("nominalPayment").append('=').append(JodaBeanUtils.toString(nominalPayment)).append(',').append(' ');
+      buf.append("redemptionValue").append('=').append(JodaBeanUtils.toString(redemptionValue)).append(',').append(' ');
       buf.append("periodicPayments").append('=').append(JodaBeanUtils.toString(periodicPayments)).append(',').append(' ');
       buf.append("frequency").append('=').append(JodaBeanUtils.toString(frequency)).append(',').append(' ');
       buf.append("rollConvention").append('=').append(JodaBeanUtils.toString(rollConvention)).append(',').append(' ');
