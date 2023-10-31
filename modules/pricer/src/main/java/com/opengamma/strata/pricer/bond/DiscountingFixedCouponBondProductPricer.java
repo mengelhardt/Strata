@@ -728,7 +728,7 @@ public class DiscountingFixedCouponBondProductPricer {
         if (absYield == 0) {
           return 0;
         }
-        double annualMultiplier = Currency.AUD.equals(bond.getCurrency())
+        double annualMultiplier = Currency.AUD.equals(bond.getCurrency()) || Currency.CAD.equals(bond.getCurrency())
                 ? 365.0 / (bond.getUnadjustedEndDate().toEpochDay() - settlementDate.toEpochDay())
                 : ((double) bond.getFrequency().eventsPerYear()) / factorToNextCoupon(bond, settlementDate);
         return absYield * annualMultiplier;
