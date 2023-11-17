@@ -807,25 +807,45 @@ public class DiscountingFixedCouponBondProductPricer {
    * @return the modified duration of the product 
    */
   public double modifiedDurationFromYield(ResolvedFixedCouponBond bond, LocalDate settlementDate, double yield) {
+    return modifiedDurationFromYield(bond, bond, settlementDate, yield);
+  }
+
+  /**
+   * Calculates the modified duration of the fixed coupon bond product from yield.
+   * <p>
+   * The modified duration is defined as the minus of the first derivative of dirty price
+   * with respect to yield, divided by the dirty price.
+   * <p>
+   * The input yield must be fractional. The dirty price and its derivative are
+   * computed for {@link FixedCouponBondYieldConvention}, and the result is expressed in fraction.
+   *
+   * @param bond  the product
+   * @param bondPeriodCounter  the product used for the time to cash flows
+   * @param settlementDate  the settlement date
+   * @param yield  the yield
+   * @return the modified duration of the product
+   */
+  public double modifiedDurationFromYield(ResolvedFixedCouponBond bond, ResolvedFixedCouponBond bondPeriodCounter,
+        LocalDate settlementDate, double yield) {
     ImmutableList<FixedCouponBondPaymentPeriod> payments = bond.getPeriodicPayments();
     int nCoupon = payments.size() - couponIndex(payments, settlementDate);
     FixedCouponBondYieldConvention yieldConv = bond.getYieldConvention();
     if (nCoupon == 1) {
       if (yieldConv.equals(US_STREET) || yieldConv.equals(DE_BONDS)) {
         double couponPerYear = bond.getFrequency().eventsPerYear();
-        double factor = factorToNextCoupon(bond, settlementDate);
+        double factor = factorToNextCoupon(bondPeriodCounter, settlementDate);
         return factor / couponPerYear / (1d + factor * yield / couponPerYear);
       }
     }
     if (yieldConv.equals(US_STREET) || yieldConv.equals(GB_BUMP_DMO) || yieldConv.equals(DE_BONDS)) {
-      return modifiedDurationFromYieldStandard(bond, settlementDate, yield);
+      return modifiedDurationFromYieldStandard(bond, bondPeriodCounter, settlementDate, yield);
     }
     if (yieldConv.equals(JP_SIMPLE)) {
       LocalDate maturityDate = bond.getUnadjustedEndDate();
       if (settlementDate.isAfter(maturityDate)) {
         return 0d;
       }
-      double maturity = bond.getDayCount().relativeYearFraction(settlementDate, maturityDate);
+      double maturity = bondPeriodCounter.getDayCount().relativeYearFraction(settlementDate, maturityDate);
       double num = bond.getRedemptionRatio() + bond.getFixedRate() * maturity;
       double den = 1d + yield * maturity;
       double dirtyPrice = dirtyPriceFromCleanPrice(bond, settlementDate, num / den);
@@ -896,12 +916,13 @@ public class DiscountingFixedCouponBondProductPricer {
   // Computes the modified duration with standard convention
   private double modifiedDurationFromYieldStandard(
       ResolvedFixedCouponBond bond,
+      ResolvedFixedCouponBond bondPeriodCounter,
       LocalDate settlementDate,
       double yield) {
 
     int nbCoupon = bond.getPeriodicPayments().size();
     double couponPerYear = bond.getFrequency().eventsPerYear();
-    double factorToNextCoupon = factorToNextCoupon(bond, settlementDate);
+    double factorToNextCoupon = factorToNextCoupon(bondPeriodCounter, settlementDate);
     double factorOnPeriod = 1 + yield / couponPerYear;
     double nominal = bond.getNotional();
     double fixedRate = bond.getFixedRate();
@@ -993,15 +1014,34 @@ public class DiscountingFixedCouponBondProductPricer {
    * @return the modified duration of the product 
    */
   public double macaulayDurationFromYield(ResolvedFixedCouponBond bond, LocalDate settlementDate, double yield) {
+    return macaulayDurationFromYield(bond, bond, settlementDate, yield);
+  }
+
+  /**
+   * Calculates the Macaulay duration of the fixed coupon bond product from yield.
+   * <p>
+   * Macaulay defined an alternative way of weighting the future cash flows.
+   * <p>
+   * The input yield must be fractional. The dirty price and its derivative are
+   * computed for {@link FixedCouponBondYieldConvention}, and the result is expressed in fraction.
+   *
+   * @param bond  the product
+   * @param bondPeriodCounter  the product used for the time to cash flows
+   * @param settlementDate  the settlement date
+   * @param yield  the yield
+   * @return the modified duration of the product
+   */
+  public double macaulayDurationFromYield(ResolvedFixedCouponBond bond, ResolvedFixedCouponBond bondPeriodCounter,
+        LocalDate settlementDate, double yield) {
     ImmutableList<FixedCouponBondPaymentPeriod> payments = bond.getPeriodicPayments();
     int nCoupon = payments.size() - couponIndex(payments, settlementDate);
     FixedCouponBondYieldConvention yieldConv = bond.getYieldConvention();
     if ((yieldConv.equals(US_STREET)) && (nCoupon == 1)) {
-      return factorToNextCoupon(bond, settlementDate) /
+      return factorToNextCoupon(bondPeriodCounter, settlementDate) /
           bond.getFrequency().eventsPerYear();
     }
     if ((yieldConv.equals(US_STREET)) || (yieldConv.equals(GB_BUMP_DMO)) || (yieldConv.equals(DE_BONDS))) {
-      return modifiedDurationFromYield(bond, settlementDate, yield) *
+      return modifiedDurationFromYield(bond, bondPeriodCounter, settlementDate, yield) *
           (1d + yield / bond.getFrequency().eventsPerYear());
     }
     throw new UnsupportedOperationException("The convention " + yieldConv.name() + " is not supported.");
